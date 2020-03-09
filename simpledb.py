@@ -14,7 +14,7 @@ class Disconnected(Exception): pass
 Error = namedtuple('Error', ('message',))
 
 class ProtocolHandler(object):
-    def handel_request(self, socket_file):
+    def handle_request(self, socket_file):
         #Parse a request from the client into it's component parts
         pass
 
