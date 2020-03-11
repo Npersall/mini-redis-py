@@ -28,7 +28,7 @@ class Server(object):
         self._server = StreamServer(
             (host, port),
             self.connection_handler,
-            spawn=self.pool)
+            spawn=self._pool)
 
         self._protocol = ProtocolHandler()
         self._kv = {}
