@@ -15,9 +15,17 @@ Error = namedtuple('Error', ('message',))
 
 class ProtocolHandler(object):
     def handle_request(self, socket_file):
-        #Parse a request from the client into it's component parts
-        pass
-
+        # Parse a request from the client into it's component parts
+        def __init__(self):
+            self.handlers = {
+                '+': self.handle_simple_string,
+                '-': self.handle_error,
+                ':': self.handle_integer,
+                '$': self.handle_string,
+                '*': self.handle_array,
+                '%': self.handle_dict
+            }
+        
     def write_response(self, socket_file, data):
         # Serialize the response data and send it to the client.
         pass
@@ -28,7 +36,7 @@ class Server(object):
         self._server = StreamServer(
             (host, port),
             self.connection_handler,
-            spawn=self.pool)
+            spawn=self._pool)
 
         self._protocol = ProtocolHandler()
         self._kv = {}
