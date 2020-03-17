@@ -85,6 +85,19 @@ class Server(object):
         self._protocol = ProtocolHandler()
         self._kv = {}
 
+        self._commands = self.get_commands()
+
+    def get_commands(self):
+        return {
+            'GET': self.get,
+            'SET': self.set,
+            'DELETE': self.flush,
+            'MGET': self.mget,
+            'MSET': self.mset}
+        }
+
+
+
     def connection_handler(self, conn, address):
         # convert "conn"(a socket object) into a file-like object
         socket_file = conn.makefile('rwb')
