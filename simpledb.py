@@ -71,7 +71,36 @@ class ProtocolHandler(object):
 
     def write_response(self, socket_file, data):
         # Serialize the response data and send it to the client.
-        pass
+        def write_response(self, socket_file, data):
+            buf = BytesIO()
+            self._write(buf, data)
+            buf.seek(0)
+            socket_file.write(buf.getvalue())
+            socket_file.flush()
+        
+        def _write(self, buf, data):
+            if isinstance(data, str):
+                data = data.encode('utf-8')
+            
+            if isinstance(data, bytes):
+                buf.write('$%s\r\n%s\r\n' % (len(data), data))
+            elif isinstance(data, int):
+                buf.write(':%s\r\n' % data)
+            elif isinstance(data, Error):
+                buf.write('-%s\r\n' % Error.message)
+            elif isinstance(data, (list, tuple)):
+                buf.write('*%s\r\n' % len(data))
+                for item in data:
+                    self._write(buf, item)
+            elif isinstance(data, dict):
+                buf.write('%%%s\r\n' % len(data))
+                for key in data:
+                    self._write(buf, key)
+                    self._write(buf, data[key])
+            elif data is None:
+                buf.write('$-1\r\n')
+            else:
+                raise CommandError('unrecognized type: %s' % type(data))
 
 
 class Server(object):
@@ -84,6 +113,33 @@ class Server(object):
 
         self._protocol = ProtocolHandler()
         self._kv = {}
+        
+        self._commands = self.getcommands()
+
+    def get_commands(self):
+        return {
+            'GET': self.get,
+            'SET': self.set,
+            'DELETE': self.delete,
+            'FLUSH': self.flush,
+            'MGET': self.mget,
+            'MSET': self.mset}
+    
+    def get_resopnse(self, data):
+        if not isinstance(data, list):
+            try:
+                data = data.split()
+            except CommandError:
+                raise CommandError('Request must be list or simple string.')
+
+        if not data:
+            raise CommandError('Missing command')
+
+        command = data[0].upper()
+        if command not in self._commands:
+            raise CommandError('Unrecognized command: %s' % command)
+
+        return self._commands[command](*data[1:])
 
     def connection_handler(self, conn, address):
         # convert "conn"(a socket object) into a file-like object
