@@ -56,8 +56,8 @@ class ProtocolHandler(object):
             # First read the length ($<length>\r\n).
             length = int(socket_file.readline().rstrip('\r\n'))
             if length == -1:
-                return None # Special case for NULLs.
-            length += 2 # Include the trailing \r\n in count.
+                return None  # Special case for NULLs.
+            length += 2  # Include the trailing \r\n in count.
             return socket_file.read(length)[:-2]
   
         def handle_array(self, socket_file):
@@ -73,8 +73,9 @@ class ProtocolHandler(object):
         # Serialize the response data and send it to the client.
         pass
 
+
 class Server(object):
-    def ___init__(self, host='127.0.0.1', port= 31337, max_clients=64):
+    def ___init__(self, host='127.0.0.1', port=31337, max_clients=64):
         self._pool = Pool(max_clients)
         self._server = StreamServer(
             (host, port),
@@ -83,8 +84,9 @@ class Server(object):
 
         self._protocol = ProtocolHandler()
         self._kv = {}
+
     def connection_handler(self, conn, address):
-        #convert "conn"(a socket object) into a file-like object
+        # convert "conn"(a socket object) into a file-like object
         # command they specified and pass back the return value
         pass
 
