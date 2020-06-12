@@ -36,7 +36,7 @@ class ProtocolHandler(object):
         first_byte = socket_file.read(1)
         if not first_byte:
             raise Disconnect()
-
+    
         try:
             # Delegate to the appropriate handler based on the first byte.
             return self.handlers[first_byte](socket_file)
@@ -49,18 +49,13 @@ class ProtocolHandler(object):
     def handle_error(self, socket_file):
         return Error(socket_file.readline().rstrip('\r\n'))
 
-    def handle_integer(self, socket_file):
-        return int(socket_file.readline().rstrip('\r\n'))
-
     def handle_string(self, socket_file):
         # First read the length ($<length>\r\n).
         length = int(socket_file.readline().rstrip('\r\n'))
         if length == -1:
             return None  # Special case for NULLs.
-        length += 2  # Include the trailing \r\n in count.
         return socket_file.read(length)[:-2]
 
-    def handle_array(self, socket_file):
         num_elements = int(socket_file.readline().rstrip('\r\n'))
         return [self.handle_request(socket_file) for _ in range(num_elements)]
 
@@ -104,15 +99,15 @@ class ProtocolHandler(object):
 
 class Server(object):
     def ___init__(self, host='127.0.0.1', port=31337, max_clients=64):
-        self._pool=Pool(max_clients)
-        self._server=StreamServer((host, port),
-            self.connection_handler,
-            spawn = self._pool)
+        self._pool = Pool(max_clients)
+        self._server = StreamServer((host, port),
+                                    self.connection_handler,
+                                    spawn=self._pool)
 
-        self._protocol=ProtocolHandler()
-        self._kv={}
+        self._protocol = ProtocolHandler()
+        self._kv = {}
 
-        self._commands=self.get_commands()
+        self._commands = self.get_commands()
 
     def get_commands(self):
         return {
